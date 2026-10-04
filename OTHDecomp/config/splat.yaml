@@ -69,14 +69,13 @@ segments:
     bss_size: 0x427FD
     subalign: null
     subsegments:
-      - [0x000000, asm, cod/000000] # .text
-      - [0x00100000, c, main]  # Tells Splat to use src/main.c for this region
-      - [0x30A130, textbin, cod/30A130] # .vutext
-      - [0x312800, data, cod/312800] # .data
-      - [0x321200, rodata, cod/321200] # .rodata
-      - [0x38A680, gcc_except_table, cod/38A680] # .gcc_except_table
-      - [0x38A780, sdata, cod/38A780] # .sdata
-      - [0x002679B8, c, engine/resource_loader]  # Points Splat to src/engine/resource_loader.cpp
+      - [0x00100000, c, main]
+      - [0x002679B8, c, engine/resource_loader]
+      - [0x30A130, textbin, cod/30A130]
+      - [0x312800, data, cod/312800]
+      - [0x321200, rodata, cod/321200]
+      - [0x38A680, gcc_except_table, cod/38A680]
+      - [0x38A780, sdata, cod/38A780]
       - { type: sbss, vram: 0x0048AF00, name: cod/0048AF00 } # .sbss
       - { type: bss, vram: 0x0048B480, name: cod/0048B480 } # .bss
   - [0x38AEDC]
