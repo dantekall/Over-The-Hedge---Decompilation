@@ -4,7 +4,7 @@ options:
   basename: SLUS_213.00
   target_path: SLUS_213.00.rom
   elf_path: build/SLUS_213.00.elf
-  base_path: .
+  base_path: ..
   platform: ps2
   compiler: EEGCC
 
