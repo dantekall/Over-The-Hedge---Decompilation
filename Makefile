@@ -1,37 +1,45 @@
-# --- OTHDecomp Makefile ---
+# Toolchain definition for PlayStation 2 EE (Emotion Engine)
+CROSS_COMPILE ?= mips64r5900el-ps2-elf-
+CC            := $(CROSS_COMPILE)gcc
+CXX           := $(CROSS_COMPILE)g++
+LD            := $(CROSS_COMPILE)ld
+OBJCOPY       := $(CROSS_COMPILE)objcopy
 
-# Toolchain definitions
-CC = ee-gcc
-CXX = ee-g++
-AS = ee-as
-LD = ee-ld
-OBJDUMP = ee-objdump
+# Docker wrapper for ps2dev environment
+DOCKER_RUN    := docker run --rm -v "$(PWD)":/workspace -w /workspace ps2dev/ps2dev
 
-# Flags for PlayStation 2 Emotion Engine (MIPS R5900)
-CFLAGS = -G0 -O2 -Wall -Iinclude
-CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
+# Compiler flags targeting PS2 GCC specs
+CFLAGS    := -O2 -G0 -mabi=eabi -mips3 -mcpu=r5900 -Iinclude
+CXXFLAGS := $(CFLAGS) -fno-exceptions -fno-rtti
 
-# Target binary name matching our ripped ELF
-TARGET = build/SLUS_213.00
+# Targets
+BUILD_DIR := build
+OUT_DIR   := out
+TARGET    := $(OUT_DIR)/SLUS_213.00
 
-# Default target: build and verify match
-all: $(TARGET) compare
+.PHONY: all clean split
 
-# Run Splat to split/prepare assembly and assets
-splat:
+all: $(TARGET)
+
+# Step A: Run Splat to split the binary and generate linker script (runs locally)
+split:
 	python3 -m splat split config/splat.yaml
 
-# Compile our C++ files into object files (.o)
-obj/%.o: src/%.cpp
+# Step B: Compile C++ files inside Docker
+$(BUILD_DIR)/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(DOCKER_RUN) $(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Link everything together using Splat's generated linker script
-$(TARGET): splat obj/engine/resource_loader.o
-	# (Linker command linking object files using config/link.ld)
-	@echo "Linking binary..."
+# Step C: Assemble ASM files inside Docker
+$(BUILD_DIR)/%.o: asm/%.s
+	@mkdir -p $(dir $@)
+	$(DOCKER_RUN) $(CC) $(CFLAGS) -c $< -o $@
 
-# Compare our built binary against the original ripped ELF
-compare: $(TARGET)
-	@sha1sum $(TARGET) reference/SLUS_213.00.sha1
-	@echo "Build matches successfully!"
+# Step D: Link object files inside Docker using Splat's linker script
+$(TARGET): split
+	@mkdir -p $(OUT_DIR)
+	$(DOCKER_RUN) $(LD) -T build/link.ld -o $@
+	@echo "Build complete: $(TARGET)"
+
+clean:
+	rm -rf $(BUILD_DIR) $(OUT_DIR) asm/
