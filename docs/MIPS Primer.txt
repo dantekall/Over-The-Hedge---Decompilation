@@ -1,0 +1,443 @@
+
+
+Welcome to Chapter 5! Before we dive into the nitty-gritty details of the executable structure, let's break down what MIPS is, where it came from, how it operates, and why it matters for our *Over The Hedge* decompilation project, guided by the gang!
+
+---
+
+#### What MIPS Is
+
+(RJ: MIPS stands for Microprocessor without Interlocked Pipelined Stages, and it is a type of computer processor architecture. Think of it like the fundamental blueprint or brain structure that tells a computer chip how to think, compute, and handle instructions.)
+
+(RJ: Unlike other processors that might use crazy, convoluted instruction sets, MIPS keeps things streamlined and reduced. It relies on a Reduced Instruction Set Computer design philosophy, meaning every single instruction is simple, neat, and gets right to the point without wasting hardware space.)
+
+(Verne: Right! So instead of having a million different complex commands for every little task, MIPS uses a smaller, highly optimized set of core instructions. This makes the processor run much faster and more efficiently, which is super important when you're trying to render a forest full of hyperactive animals on older console hardware.)
+
+(Hammy: It's like my brain when I drink too much soda, but way more organized! Every single thought is clean, fast, and shoots straight across the track without getting tangled up in messy background loops!)
+
+(Stella: Exactly, Hammy, though let's hope your brain has a bit more stability than a raw chip instruction. In technical terms, MIPS handles 32-bit or 64-bit data chunks depending on the exact version, making it powerful enough to drive the massive worlds found in PlayStation 2 games.)
+
+(Ozzie: It acts as the invisible machinery underneath everything we see on screen. When RJ moves around a log or I play dead, it's all translated down into crisp MIPS instructions that the console's Emotion Engine crunches at lightning speed.)
+
+(Heather: And because it's a standardized architecture, developers back in the day loved it because they could write predictable code that behaved the exact same way across different development kits. It takes away the guesswork and gives programmers a clean, reliable canvas.)
+
+(Porcupine Kid: So it's basically the rules of the game's universe, but written for math and electricity instead of acorns and fences? Exactly! It dictates how numbers are added, how memory is accessed, and how commands flow from top to bottom.)
+
+(RJ: Spot on. MIPS is the underlying language of the PS2, and understanding it means we can finally peek behind the curtain and see how *Over The Hedge* was built from the ground up.)
+
+---
+
+#### How It Came About
+
+(Verne: To understand where MIPS came from, we have to travel back to the early 1980s at Stanford University. Back then, computer scientists were noticing that standard processors were getting bogged down by overly complex instructions that rarely ever got used in real applications.)
+
+(Verne: A brilliant professor named John Hennessy and his research team decided to challenge the status quo. They asked a radical question: What if a processor performed much better if we drastically simplified its instruction set and let it run instructions in a heavily pipelined stream?)
+
+(Verne: That idea birthed the RISC philosophy. Instead of heavy, bloated code that required massive hardware support for single commands, they built a lean machine that executed one simple instruction per clock cycle with stunning consistency.)
+
+(RJ: And tech companies immediately realized this was a goldmine. In 1984, Hennessy and others left Stanford to found MIPS Computer Systems, turning an academic experiment into a commercial powerhouse that started selling high-performance chips to the industry.)
+
+(RJ: Soon, everyone wanted a piece of the action. Silicon Graphics adopted MIPS architectures for their powerful graphics workstations, pushing the boundaries of 3D rendering and visualization in the late 80s and 90s.)
+
+(Stella: Silicon Graphics' involvement was a massive turning point because it tied MIPS directly to high-end gaming and arcade hardware. Nintendo used MIPS chips for the Nintendo 64, and Sony realized that MIPS was the absolute perfect foundation for their upcoming console generation.)
+
+(Heather: That brings us right to the PlayStation 2 era. Sony teamed up with Toshiba to build a custom, hyper-powered chip called the "Emotion Engine," and at its core, it used a specialized MIPS III architecture—the R5900—packed with custom 128-bit vector extensions.)
+
+(Ozzie: Which means every time our game disc spins up in a PS2, it's running a direct descendant of a revolutionary 1980s university research project. History is wild when you look at it under a microscope, or in this case, inside a disassembler.)
+
+(Hammy: And now we get to read all that history line by line! It's like digging up a time capsule, except instead of old comic books, it's pure silicon magic!)
+
+---
+
+#### How MIPS Works
+
+(Hammy: MIPS works by taking simple instructions—like adding two numbers together or moving data from a register into memory—and executing them one after another in a straight pipeline! Every standard instruction is a fixed 32 bits long, which makes it super easy for the processor to fetch and decode them without wasting time guessing how long a command is.)
+
+(Heather: Inside the processor, you have a set of special storage locations called registers—such as `$v0`, `$a0`, `$t0`, or `$s0`—where the CPU does its heavy lifting. Instead of constantly reading and writing to slow main memory, MIPS loads data into these registers, performs lightning-fast math or logic operations, and then puts the results back where they belong.)
+
+(Ozzie: Control flow is managed through branches and jumps, allowing the game to make decisions—like checking if RJ has collected enough food to trigger a cutscene. If a condition is met, the processor jumps to a new memory address; otherwise, it just keeps cruising down the pipeline instruction by instruction.)
+
+---
+
+#### How MIPS Is Useful in Over The Hedge
+
+(RJ: Knowing how MIPS works is the ultimate cheat code for our decompilation project. Because *Over The Hedge* was compiled directly into MIPS machine code for the PS2, every single action we take in the game lives and breathes as MIPS instructions.)
+
+(RJ: When we load our executable into Ghidra, it translates those raw hexadecimal bytes into readable MIPS assembly. Understanding the structure of MIPS lets us look at that assembly and instantly figure out what the developers were trying to code.)
+
+(Stella: It helps us trace function arguments and return values because MIPS has strict calling conventions. We know which registers hold incoming parameters—like `$a0` to `$a3`—and where functions stash their outputs, which takes all the guesswork out of reconstructing C++ functions.)
+
+(Ozzie: It also helps us spot optimization tricks the compiler used, like branch delays or register reuse. When we write our own replacement C++ code, keeping MIPS behavior in mind ensures that our compiler outputs matching assembly bytes.)
+
+(Heather: Without knowing MIPS, looking at a disassembler would feel like staring at an alien language with zero context. But once you learn the basic instruction patterns, it becomes a logical puzzle where every piece fits into place.)
+
+(Porcupine Kid: So MIPS is our map, our compass, and our toolkit all rolled into one! It lets us turn an unreadable black box back into clean, understandable source code.)
+
+---
+
+### 1. Architecture and Memory
+
+(RJ: Let's talk about where all this data actually lives. The PS2's Emotion Engine runs R5900 MIPS code, and every piece of code, string, or variable needs a specific home address.)
+
+An **address** is simply a numerical location in memory (represented in hexadecimal, like `0x00100000`). At runtime, the PS2 maps everything into virtual memory. Here is a tiny conceptual memory map to show how code and data occupy different address ranges:
+
+```text
++-----------------------+ 0x00000000
+|      NULL / BIOS      |
++-----------------------+ 0x00100000
+|  .text (Code/Exec)    | <-- MIPS instructions live here
++-----------------------+ 0x00350000
+|  .rodata (Read-Only)  | <-- Strings and constants
++-----------------------+ 0x00410000
+|  .data (Initialized)  | <-- Global variables with start values
++-----------------------+ 0x00480000
+|  .bss (Uninitialized) | <-- Zeroed-out variables at boot
++-----------------------+
+
+```
+
+---
+
+### 2. Sections
+
+(Stella: Now, how do we organize all of that before it gets loaded? That brings us to sections. Remember this crucial distinction: **sections are ELF/build-time organization; memory addresses describe where things are mapped or used at runtime.**)
+
+Sections are just convenient categories used by the compiler and Splat to group similar things together:
+
+* `.text`: Contains the actual executable MIPS instructions (the code).
+* `.rodata`: Contains read-only data, like text strings ("Resource Loader") or constant numbers.
+* `.data`: Contains global variables that have predefined starting values.
+* `.bss`: Contains variables that start at zero, like uninitialized counters or buffers.
+
+In your Splat output and YAML file, you slice your binary precisely along these section boundaries!
+
+---
+
+### 3. Symbols and Functions
+
+(Ozzie: When you look at an executable in Ghidra, you'll see names attached to certain places. A **symbol** is just a human-readable name associated with a specific memory address.)
+
+(Ozzie: But keep this in mind: **“function” isn’t simply synonymous with “symbol”—a function may have no surviving name, and symbols can name data too.**)
+
+Because *Over The Hedge* was built as a "stripped" executable, many functions lost their original C++ names. A function is simply a contiguous region of code that can be called, but if it's stripped, Ghidra will label it generically like `FUN_002679b8`. Meanwhile, a symbol can point to a function *or* a data structure.
+
+Here is a quick MIPS code example of a simple function prologue and instruction structure:
+
+```mips
+# A typical MIPS function starting at an address
+FUN_002679b8:
+    addiu   $sp, $sp, -32       # Allocate stack space
+    sw      $ra, 28($sp)        # Save return address
+    sw      $s0, 24($sp)        # Save preserved register
+    move    $s0, $a0            # Copy argument 0 into $s0
+    # ... code logic ...
+    lw      $ra, 28($sp)        # Restore return address
+    jr      $ra                 # Return to caller
+    addiu   $sp, $sp, 32        # Delay slot: clean up stack
+
+```
+
+---
+
+### 4. Data Layout
+
+(Hammy: Data doesn't just float around in random chunks—it's packed tightly together into bytes! How a tool interprets those bytes depends entirely on the data type and layout.)
+
+For example, if you look at 4 consecutive bytes in memory like `00 00 20 41` (little-endian on MIPS), a tool might see them differently based on how you define them:
+
+* As four separate `char` bytes: `0x00, 0x00, 0x20, 0x41`
+* As a single 32-bit integer (`int`): `0x41200000`
+
+Defining your structs (like we did with `ResourceLoader` in your previous step) tells Ghidra how to chop up those raw bytes into meaningful fields!
+
+---
+
+### 5. Tie It Together
+
+(RJ: Let's tie everything together with a real example from our game. If we look at `ResourceLoader_Init` from your previous work, its code instructions live in the `.text` section starting around address `0x002679B8`, while its global strings or timing flags live over in `.rodata` or `.bss` data ranges.)
+
+When the game boots, the runtime maps these sections into specific memory addresses, allowing the MIPS processor to jump directly from code execution to data manipulation seamlessly.
+
+---
+
+### Your Turn: The Tutorial 8 Setup Exercise!
+
+(Porcupine Kid: Before we move on here is a little puzzle for you to chew on!)
+
+> **The Challenge:**
+> Here is a memory address: `0x00412E98`, a few raw bytes: `00 00 00 00`, and a Ghidra view showing it referenced inside the `entry` function as a global status flag.
+> *What do you think this region contains, and what evidence supports your answer from our initialization analysis?*
+
+(RJ: Think about it, and we'll dive deep into the MIPS instructions needed to investigate it!)
+
+
+
+
+
+
+
+(RJ: Welcome back, team! Now that we know how MIPS came to be and where things live in memory, it's time to open up the hood and look at actual instructions. Don't panic—it's just like reading a recipe, if the recipe was written by a tiny, hyperactive robot.)
+
+(Verne: A robot that doesn't use pleasantries, RJ. Just raw numbers and registers. Let's take it one step at a time so nobody loses their shell.)
+1. Registers and Instruction Format
+
+(Hammy: Registers! Think of them as the CPU's absolute fastest pockets! Instead of walking all the way across the forest to main memory, the processor keeps its favorite data right there in its hands inside registers!)
+
+(Stella: Exactly, Hammy. On the PS2's R5900 chip, we have a specific set of general-purpose registers, and the compiler uses them for very specific jobs. Let's look at the heavy hitters you'll see constantly in Over The Hedge:)
+
+    $zero: Always holds the number 0. You can write to it all you want, but it will never change. It's the ultimate stubborn anchor.
+
+    $v0: Used to hold return values from functions (like handing you your change after a transaction).
+
+    $a0 – $a3: Argument registers. When a function is called, these hold the incoming inputs.
+
+    $t0 – $t9: Temporary registers. Scratchpad space for quick calculations where nobody cares if the data gets overwritten later.
+
+    $s0 – $s7: Saved registers. If a function uses these, it must restore their original values before finishing. Safe and reliable.
+
+    $sp: Stack pointer. Points to the top of the current stack frame.
+
+    $ra: Return address. Remembers where to jump back to when a function finishes its job.
+
+(Ozzie: It’s like a cast of characters, where everyone has a specific role to play in the kitchen!)
+2. Moving and Calculating Values
+
+(Heather: Math and moving data around is where instructions like addiu, addu, subu, andi, ori, and lui come in.)
+
+(Heather: MIPS instructions usually follow a strict pattern: operation, destination, source 1, source 2.)
+
+    addiu (Add Immediate Unsigned): Adds a constant number to a register. For example, addiu $t0, $a0, 0x10 means take whatever is in $a0, add 16 (0x10) to it, and stash the result in $t0.
+
+    addu / subu: Standard addition or subtraction between two registers.
+
+    andi / ori: Bitwise AND or OR operations using a constant value. Great for masking flags.
+
+    sll (Shift Left Logical): Slips bits to the left, which is a fast way of multiplying by powers of 2.
+
+    lui (Load Upper Immediate): Loads a 16-bit constant into the upper half of a register. Because MIPS instructions are fixed at 32 bits, you often need lui paired with an ori to build a full 32-bit memory address or large number!
+
+3. Reading and Writing Memory
+
+(Verne: Registers are great, but eventually we need to touch main memory to grab game data or save changes. That’s where load and store instructions come in.)
+
+    lw (Load Word): Reads 4 bytes (a "word") from memory into a register.
+
+    sw (Store Word): Writes 4 bytes from a register out into memory.
+
+(Verne: They use base-plus-offset addressing. For example, look at this classic structure-field access:)
+MIPS Assembler
+
+lw $v0, 0x10($a0)
+
+(RJ: Here’s how you read that: take the base address stored in $a0 (like the start of our ResourceLoader struct), add an offset of 0x10 bytes to it, grab whatever 4-byte value is sitting at that exact memory slot, and load it into $v0!)
+4. Making Decisions
+
+(Hammy: Decisions, decisions! How does the game choose whether RJ gets an acorn or a trap snaps shut? Branches and comparisons!)
+
+    beq (Branch if Equal): Compares two registers. If they match, jump to a new label.
+
+    bne (Branch if Not Equal): Jumps if they don't match.
+
+    slti (Set Less Than Immediate): Compares a register to a constant. If the register is smaller, sets a target register to 1; otherwise, sets it to 0.
+
+    Pseudoinstructions like beqz (Branch if Equal to Zero): A shorthand convenience command that the assembler expands into standard MIPS under the hood.
+
+(Heather: Let's trace a tiny if statement logic block:)
+MIPS Assembler
+
+slti $t0, $s0, 5        # Is $s0 less than 5?
+bnez $t0, target_label   # If $t0 is NOT zero (meaning yes, it was less than 5), jump!
+
+5. Jumps and Delay Slots
+
+(Ozzie: And when we want to go somewhere unconditionally, we use j (jump) or jal (jump and link).)
+
+(Ozzie: But watch out for the infamous delay slot! In MIPS, the instruction immediately following a branch or jump actually executes before the control transfer happens. It's like stepping forward onto a trap door while your brain is still processing the command to jump!)
+
+(Stella: If the compiler can't find a useful instruction to put in that delay slot, it just throws in a nop (no-operation) so nothing breaks.)
+The Running Example: Step-by-Step
+
+(RJ: Alright team, let's put this into practice. We are going to look at a short, self-contained MIPS function that checks a status value and adjusts a register. No function calls or stack frames here—just pure flow.)
+Step 1: Predict What It Does
+
+Before reading the breakdown, look at this raw assembly snippet. What do you think it's trying to calculate?
+MIPS Assembler
+
+    lw      $v0, 0x0($a0)
+    slti    $t0, $v0, 10
+    bnez    $t0, label_low
+    addiu   $v0, $zero, 10
+    j       label_end
+label_low:
+    addiu   $v0, $zero, 1
+label_end:
+    jr      $ra
+    nop
+
+Step 2: Instruction-by-Instruction Breakdown
+
+    lw $v0, 0x0($a0): Grabs a 32-bit integer from the base address in $a0 and puts it into $v0. (Think of $a0 as an input pointer).
+
+    slti $t0, $v0, 10: Checks if that value is less than 10. If it is, $t0 becomes 1. If not, $t0 becomes 0.
+
+    bnez $t0, label_low: If $t0 is not zero (meaning the value was indeed less than 10), jump down to label_low.
+
+    addiu $v0, $zero, 10: (Delay slot or fallback) If the branch didn't take (value was 10 or more), set $v0 to 10.
+
+    j label_end: Jump past the low branch to exit the function.
+
+    (Delay slot for the jump): Runs a hidden nop or background instruction.
+
+    label_low:: Destination if the value was less than 10.
+
+    addiu $v0, $zero, 1: Set $v0 to 1.
+
+    label_end:: Exit point.
+
+    jr $ra: Return back to the caller using $ra.
+
+    nop: Delay slot for the return jump.
+
+Step 3: Equivalent C-like Pseudocode Version
+C
+
+int CheckThreshold(int* ptr) {
+    int val = *ptr;
+    if (val < 10) {
+        return 1;
+    } else {
+        return 10;
+    }
+}
+
+(Verne: Look at that! It's just a simple clamping or minimum threshold check!)
+Your Turn: The Tutorial 8 Exercise!
+
+(Porcupine Kid: Your turn at bat! Trace this snippet carefully before scrolling down to the walkthrough.)
+
+    The Code Snippet:
+    MIPS Assembler
+
+        lw      $t1, 0x4($a0)
+        addiu   $t2, $zero, 42
+        bne     $t1, $t2, skip_block
+        addiu   $v0, $zero, 1
+        j       real_exit
+    skip_block:
+        addiu   $v0, $zero, 0
+    real_exit:
+        jr      $ra
+        nop
+
+    The Challenge:
+    If the integer located at 0x4($a0) happens to equal 42, what will $v0 be set to when the function hits jr $ra, and which path (the branch or the fall-through) does it take?
+
+Walkthrough Reveal
+
+(RJ: Let's walk through it together!)
+
+    lw $t1, 0x4($a0) loads the value 42 into register $t1.
+
+    addiu $t2, $zero, 42 puts the number 42 into register $t2.
+
+    bne $t1, $t2, skip_block compares $t1 and $t2. Since 42 equals 42, they are equal, so the bne (Branch Not Equal) condition fails! It does not branch.
+
+    Because it didn't branch, it falls straight through into the delay slot: addiu $v0, $zero, 1 executes, setting $v0 to 1.
+
+    Next instruction: j real_exit jumps straight to the exit, bypassing the skip_block entirely.
+
+    Result: $v0 is 1! If the input had been anything other than 42, it would have branched to skip_block and set $v0 to 0.
+
+(Hammy: You crushed it! You're reading MIPS like a pro animal ready to raid a suburban kitchen!)
+
+
+
+
+
+
+
+### Tutorial 10 — Debugging the game in PCSX2
+
+(RJ: Alright, gang! We've written code, analyzed MIPS instructions, and mapped out stack frames. Now it's time for the ultimate reality check: watching the game run live inside the PCSX2 emulator!)
+
+(Verne: Live? As in, while Hammy is bouncing off the walls and I'm trying to avoid getting caught by human traps?)
+
+(RJ: Exactly, Verne! We're going to use a debugger to catch our functions red-handed and prove our theories against reality.)
+
+---
+
+#### 1. Prepare a Repeatable Test
+
+(Heather: Step one is setting up a repeatable test. You don't want to wander around a forest level aimlessly hoping a function gets called. Pick a function with a crystal-clear trigger—like pressing a pause button, triggering a sound effect, or running a specific initialization check when a level loads. Write down the exact steps to reach that point consistently.)
+
+---
+
+#### 2. Find Its Runtime Address
+
+(Stella: Next, you need the runtime address. Don't blindly assume an address from the ELF file automatically matches the live address in the emulator's memory space. Depending on how the game loads and relocates, you must check the base loading offset in PCSX2's symbol or memory viewer to correctly map your Ghidra address to the live running address.)
+
+---
+
+#### 3. Set an Execution Breakpoint
+
+(Ozzie: This is where the magic happens! Fire up PCSX2, reach your trigger point, and set an **execution breakpoint** at your target function's address.)
+
+(Hammy: Freeze frame! The whole world stops moving right when our code runs!)
+
+> *Note on Stability:* Stick primarily to **execution breakpoints** when debugging. A PCSX2 issue report notes that execution breakpoints work reliably across setups, while memory breakpoints/watchpoints can sometimes be finicky depending on the emulator build.
+
+---
+
+#### 4. Read the State
+
+(RJ: Once the game pauses right on your function, look at the registers before stepping forward:)
+
+* Check **`$a0 – $a3`** to see what input arguments were handed to the function.
+* Check **`$ra`** to see who called it.
+* Check **`$sp`** to inspect the stack frame.
+* Inspect nearby memory using base-plus-offset rules to see what data structures are being read or written.
+
+---
+
+#### 5. Check the Hypothesis
+
+(Verne: Now, test your theory. Change an input condition—like entering a different menu state or collecting an item—and see if the register or memory values change the way you predicted they would based on your Ghidra analysis.)
+
+---
+
+#### 6. Wrap Up with Evidence
+
+(Heather: Finally, tie your findings together. Show the function, the active breakpoint in PCSX2, and one concrete conclusion supported by live observation. Be honest about which parts match your expectations and which variables are still educated guesses.)
+
+---
+
+### Your Turn: The Tutorial 10 Debugging Challenge!
+
+(Porcupine Kid: Time for a mini debugging puzzle to test your skills!)
+
+> **The Scenario:**
+> You set an execution breakpoint on a status-checking function at live address `0x002679B8`. You trigger the event in PCSX2, and the emulator pauses right on the instruction:
+> ```mips
+> lw $v0, 0x0($a0)
+> 
+> ```
+> 
+> 
+> Looking at the register panel in PCSX2, you see that `$a0` currently holds the address `0x0048C8C0`. When you look at memory at that address, it contains the 32-bit integer value `42`.
+> **The Challenge:**
+> 1. After stepping over this single instruction, what value will register `$v0` contain?
+> 2. What does this tell you about the pointer stored in `$a0`?
+> 
+> 
+
+---
+
+#### Walkthrough Reveal
+
+(RJ: Let's check your work!)
+
+1. **The Result in `$v0`:** The instruction loads the 4-byte word from memory offset `0x0` of the address in `$a0`. Since memory at `0x0048C8C0` holds `42`, register **`$v0` will be set to `42**`.
+2. **What It Tells Us:** It confirms that `$a0` is a valid pointer pointing to a data structure containing an integer field (such as a status flag or counter), and our function successfully dereferences it to read its live value!
+
+(Hammy: Look at you go! From ripping ISOs to reading MIPS and debugging live emulation—you are a certified decompilation superstar ready to conquer *Over The Hedge*!)
+
+
