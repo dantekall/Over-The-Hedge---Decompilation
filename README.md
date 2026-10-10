@@ -1,11 +1,12 @@
+Some may know, some may not, but for the past 3-4 months, I've been reverse engineering and decompiling the PS2 version of Over The Hedge.
 
-In the past 3-4 months, I have been decompiling the PS2 version of Over The Hedge.
+This project aims to reverse-engineer and decompile the retail NTSC-U PlayStation 2 version of Over the Hedge (SLUS_213.00). The goal is to recreate its source code closely enough to produce a matching build: an executable that is identical to the original game.
 
-Decompiling the game involves recreating the game's source code based on reverse-engineering. Having source code will give us the ability to mod the game to its fullest, and even port the game to other platforms.
+Reconstructing the source code can enable deeper modding and may make ports to other platforms possible. The work is complex and ongoing, so contributions, questions, and help spreading awareness are welcome.
 
-It is a C++ decompilation, meaning that the final build is and aims to be a C++ decompilation of the game's executable. 
+If you've got any questions you can find me on this GitHub repository and the PS1/PS2 Decompilation Discord Server. Thanks.
 
-This project is complex and time-consuming, so I am looking for support AND for people willing to contribute, or just raising awareness and spreading the word.
+I'm currently targeting the retail NTSC-U build.
 
 
 
