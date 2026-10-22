@@ -1,0 +1,5 @@
+// Visit https://github.com/ethteck/splat/wiki/Adding-Symbols for documentation about this file
+0x003d9100 InitializeSubsystems
+0x0027cb00 SubsystemShutdown
+0x0027ca68 SceneInitialize
+0x00100258 WorkerThreadEntry
