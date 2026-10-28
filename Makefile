@@ -1,19 +1,34 @@
-# OTHDecomp Makefile scaffold
+# Over The Hedge (PS2) Decompilation Makefile
 
-CROSS_COMPILE ?= mips-linux-gnu-
-CC            := $(CROSS_COMPILE)gcc
-LD            := $(CROSS_COMPILE)ld
-CFLAGS        := -O2 -G0 -mabi=eabi -mcpu=r5900 -Iinclude
-LDFLAGS := -T config/linker.ld -nostdlib -Wl,-Map=build/OTH.map
+BUILD_DIR = build
+TARGET = $(BUILD_DIR)/SLUS_213.00
 
-SRC_FILES     := $(wildcard src/*.c)
-OBJ_FILES     := $(SRC_FILES:src/%.c=build/%.o)
+# Compiler & Toolchain settings (using Docker container)
+DOCKER_CMD = docker run --rm -v $(shell pwd):/workspace mipsr5900ps2elfgcc
+CXX = mips64r5900el-ps2-elf-g++
+AS = mips64r5900el-ps2-elf-as
+LD = mips64r5900el-ps2-elf-ld
 
-all: build/OTH.elf
+# Compiler flags
+CFLAGS = -O2 -G0 -xc++ -fopt-stack -g2 -mabi=eabi -mcpu=r5900 -Iinclude
 
-build/%.o: src/%.c
-	@mkdir -p build
-	$(CC) $(CFLAGS) -c $< -o $@
+all: $(BUILD_DIR) $(TARGET)
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+# Split ROM using Splat (if config exists)
+split:
+	python3 tools/splat/split.py splat.yaml
+
+# Build target executable
+$(TARGET): src/main.cpp
+	@echo "Building project..."
+	# Add your compilation & linking rules here
+	touch $(TARGET)
+	@echo "Build complete: $(TARGET)"
 
 clean:
-	rm -rf build
+	rm -rf $(BUILD_DIR)/*.elf $(BUILD_DIR)/SLUS_213.00
+
+.PHONY: all split clean
