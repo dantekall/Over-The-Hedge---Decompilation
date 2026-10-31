@@ -1,0 +1,66 @@
+char* func_0036DF00(int type) {
+    switch (type) {
+        case -1:
+            return "HK_SHAPE_ALL";
+        case 1:
+            return "HK_SHAPE_CONVEX";
+        case 2:
+            return "HK_SHAPE_COLLECTION";
+        case 3:
+            return "HK_SHAPE_BV_TREE";
+        case 4:
+            return "HK_SHAPE_SPHERE";
+        case 5:
+            return "HK_SHAPE_CYLINDER";
+        case 6:
+            return "HK_SHAPE_TRIANGLE";
+        case 7:
+            return "HK_SHAPE_BOX";
+        case 8:
+            return "HK_SHAPE_CAPSULE";
+        case 9:
+            return "HK_SHAPE_CONVEX_VERTICES";
+        case 10:
+            return "HK_SHAPE_CONVEX_PIECE";
+        case 11:
+            return "HK_SHAPE_MULTI_SPHERE";
+        case 12:
+            return "HK_SHAPE_LIST";
+        case 13:
+            return "HK_SHAPE_CONVEX_LIST";
+        case 14:
+            return "HK_SHAPE_CONVEX_TRANSLATE";
+        case 15:
+            return "HK_SHAPE_CONVEX_TRANSFORM";
+        case 16:
+            return "HK_SHAPE_TRIANGLE_COLLECTION";
+        case 17:
+            return "HK_SHAPE_MULTI_RAY";
+        case 18:
+            return "HK_SHAPE_HEIGHT_FIELD";
+        case 19:
+            return "HK_SHAPE_SAMPLED_HEIGHT_FIELD";
+        case 20:
+            return "HK_SHAPE_TRI_PATCH";
+        case 21:
+            return "HK_SHAPE_SPHERE_REP";
+        case 22:
+            return "HK_SHAPE_BV";
+        case 23:
+            return "HK_SHAPE_PLANE";
+        case 24:
+            return "HK_SHAPE_MOPP";
+        case 25:
+            return "HK_SHAPE_TRANSFORM";
+        case 26:
+            return "HK_SHAPE_PHANTOM_CALLBACK";
+        case 27:
+            return "HK_SHAPE_USER0";
+        case 28:
+            return "HK_SHAPE_USER1";
+        case 29:
+            return "HK_SHAPE_USER2";
+        default:
+            return "unknown";
+    }
+}
