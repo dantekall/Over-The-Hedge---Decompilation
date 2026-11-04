@@ -1,0 +1,27 @@
+Over The Hedge was developed by Edge of Reality and published by Activision in 2006 for the Nintendo GameCube, PlayStation 2 and Xbox.
+Unlike most video games based on movies, this one starts at the climax of the film, with RJ having his change of heart and the animals defeating Gladys, Vincent, and Dwayne, leaving the forest animals free to do as they please.
+Afterwards, the game jumps forward in time to one year later, when raiding people's houses for food and other things has become routine for the Hedgies. One day, however, they come home to find all their food has been stolen and their stuff broken. As it turns out, Dwayne the Verminator, known to the animals as "The Sniffer", has returned with an army of brainwashed animals, all of which are controlled using mind control caps that he has invented. From this point on, the game sees the Hedgies resume stealing food from the humans as well as a variety of other devices, including a laptop, a film projector, a popcorn machine, a cotton candy machine, and even a satellite dish from Vincent's cave, among other things.
+Playable characters include RJ, Verne, Hammy, and Stella. While playing, you can use weapons such as golf clubs, plungers, baseball bats, etc. to fight enemies. You can also throw long range weapons, such as frisbees or boomerangs. There are various toy guns thrown about the game as well, like a ball launcher.
+
+### Engine Details
+
+The *Over The Hedge* engine is built around the unique hardware constraints and capabilities of the Sony PlayStation 2's Emotion Engine (EE). Powered by a 128-bit MIPS R5900 core, the engine manages gameplay logic, physics calculations, and asset streaming through a tightly integrated system designed to maximize the console's distinct processing pipeline. Because the PS2 lacks a traditional cached PC architecture, the engine code relies heavily on precise memory management and efficient loop structures to prevent performance bottlenecks during active gameplay.
+
+The architectural design utilizes modular subsystems to handle rendering, object management, and collision detection within the game world. Core components, such as `MyObject` entity handlers and sub-structures like `UnkSubStruct`, are managed via structured memory layouts that allow efficient traversal and updates during each game frame. Pointers and object states are passed systematically between routines to ensure that entity creation, state transitions, and clean-up phases execute deterministically.
+
+To maintain stable performance across crowded environments and fast-paced action sequences, the engine offloads heavy geometry and transformation tasks to the EE's co-processors, the Vector Units (VU0 and VU1). While much of the gameplay logic remains in standard C/C++ compiled functions, specialized routines interact closely with low-level hardware registers, local data arrays, and direct memory access (DMA) channels to stream graphical and world data without stuttering.
+
+Beneath the custom game code lies a foundational layer of standard PlayStation 2 development kit (SDK) libraries and proprietary middleware. This setup handles low-level tasks such as file loading, input polling, and audio mixing, allowing the game-specific engine loops to focus entirely on maintaining game state, character behavior, and script execution. The engine's modular nature makes it possible to isolate individual functions for reverse engineering and decompilation without disrupting the broader system framework.
+
+---
+
+### Target Specifications for the Executable
+
+The target executable for the US release of *Over The Hedge* is compiled as a standard PlayStation 2 ELF binary identified by the game serial `SLUS_213.00`. It acts as the primary container for all compiled game code, handling symbol resolution, memory segment mapping, and system initialization routines upon booting the disc. Every function, global variable, and reference point within the binary is anchored to specific virtual memory addresses defined by the original link map.
+
+The binary is built using a MIPS-targeted GCC toolchain (`ee-gcc`) configured with specific performance and optimization flags, notably `-O2` for execution speed and `-G0` to manage the small data area threshold. These compilation choices dictate how local variables, register allocation, and stack frames—such as utilizing standard doubleword saves (`sd`/`ld`) versus quadword alignments—are handled during function prologues and epilogues.
+
+The executable's internal structure is strictly mapped out using project configuration files like `splat.yaml`, which define how individual text, data, and BSS segments are disassembled, parsed, and reassembled. Functions such as `func_00212A20` reside within specific text sections, requiring exact instruction ordering, register usage, and branch alignment to ensure proper linking against external SDK functions and global data symbols like `D_004A4FA0`.
+
+Execution flow within the binary strictly follows established MIPS/EABI calling conventions, governing how arguments are passed via general-purpose registers (`$a0` through `$a3`), how return values are handled in `$v0`, and how stack frames are allocated and torn down. Maintaining precise compatibility with these calling standards and register preservation rules is essential for achieving a successful byte-for-byte match during the decompilation and recompilation workflow.
+
